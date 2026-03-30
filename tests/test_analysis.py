@@ -4,8 +4,8 @@ import pytest
 import numpy as np
 
 from forgedoe.analysis.regression import fit_model
-from forgedoe.analysis.optimization import composite_desirability, desirability_function, optimize_responses
-from forgedoe.core.types import AnalysisResult, Factor, Response
+from forgedoe.analysis.optimization import composite_desirability, desirability_function
+from forgedoe.core.types import Response
 from forgedoe.power.power_analysis import power_for_factorial, required_replicates, sample_size_for_regression
 
 
@@ -115,7 +115,6 @@ class TestAdaptive:
             add_observation,
             generate_initial_points,
             get_current_best,
-            should_stop,
             suggest_next_point,
         )
 

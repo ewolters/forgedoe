@@ -85,7 +85,8 @@ def suggest_next_point(
 
         gp = GaussianProcessRegressor(kernel=Matern(nu=2.5), n_restarts_optimizer=5)
         gp.fit(X, y)
-        predict_fn = lambda pts: gp.predict(pts, return_std=True)
+        def predict_fn(pts):
+            return gp.predict(pts, return_std=True)
     except ImportError:
         predict_fn = _simple_rbf_surrogate(X, y)
 

@@ -136,7 +136,7 @@ class TestLHS:
     def test_maximin_better(self):
         """Maximin LHS should have larger minimum distance than random LHS."""
         factors = _factors(3)
-        regular = latin_hypercube(factors, n_samples=10)
+        latin_hypercube(factors, n_samples=10)
         optimized = maximin_lhs(factors, n_samples=10, n_iterations=50)
         assert optimized is not None
 

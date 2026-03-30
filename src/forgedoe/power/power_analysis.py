@@ -27,7 +27,6 @@ def power_for_factorial(
         Power (0-1)
     """
     n_runs = 2**n_factors * n_replicates
-    dof_model = 2**n_factors - 1
     dof_error = n_runs - 2**n_factors
 
     if dof_error <= 0:

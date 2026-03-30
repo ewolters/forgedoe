@@ -57,7 +57,6 @@ def fractional_factorial(factors: list[Factor], resolution: int = 3, randomize: 
     else:
         p = k - 4 if resolution <= 3 else k - 5
 
-    n_runs = 2 ** (k - p)
     base_k = k - p
 
     # Generate base factorial
