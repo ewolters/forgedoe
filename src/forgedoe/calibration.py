@@ -8,7 +8,6 @@ Golden reference cases for DOE computations:
 
 from __future__ import annotations
 
-import math
 
 
 # Golden reference cases — known correct answers
