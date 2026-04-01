@@ -101,8 +101,9 @@ def fit_model(
     f_p = 1 - stats.f.cdf(f_stat, dof_model, dof_res) if dof_res > 0 and dof_model > 0 else 1
 
     # Coefficient standard errors and t-values
-    se_beta = np.sqrt(np.diag(XtX_inv) * ms_res)
-    t_vals = beta / se_beta
+    with np.errstate(divide='ignore', invalid='ignore'):
+        se_beta = np.sqrt(np.diag(XtX_inv) * ms_res)
+        t_vals = np.where(se_beta > 0, beta / se_beta, 0.0)
     p_vals = [2 * (1 - stats.t.cdf(abs(t), dof_res)) if dof_res > 0 else 1.0 for t in t_vals]
 
     coefficients = {terms[i]: round(float(beta[i]), 6) for i in range(p)}
