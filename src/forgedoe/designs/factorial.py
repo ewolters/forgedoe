@@ -87,7 +87,6 @@ def fractional_factorial(factors: list[Factor], resolution: int = 3, randomize: 
 
     # k == 4, resolution III: 2^(4-1)=8
     if k == 4 and resolution == 3:
-        key = None  # handle inline
         p = 1
         generators = [[0, 1, 2]]  # D = ABC
     elif (k, resolution) in _catalog:

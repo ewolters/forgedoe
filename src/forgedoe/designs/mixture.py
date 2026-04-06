@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import itertools
 import random
-from dataclasses import dataclass
 
 from ..core.types import DesignMatrix, Factor
 
@@ -175,7 +174,7 @@ def extreme_vertices(n_components: int, lower_bounds: list[float] | None = None,
         return DesignMatrix(
             factors=[Factor(f"x{i+1}", lower_bounds[i], upper_bounds[i]) for i in range(q)],
             matrix=[lower_bounds], run_order=[1],
-            is_coded=False, design_type=f"Extreme Vertices (1 run, fully constrained)",
+            is_coded=False, design_type="Extreme Vertices (1 run, fully constrained)",
         )
 
     # Adjusted upper bounds in pseudo-component space
