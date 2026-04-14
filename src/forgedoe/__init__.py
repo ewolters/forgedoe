@@ -43,6 +43,11 @@ __all__ = [
     "power_for_factorial",
     "required_replicates",
     "sample_size_for_regression",
+    # posteriors (conjugate Normal-Inverse-Gamma)
+    "bayesian_linear_posterior",
+    "contrast_posterior",
+    "predictive_posterior",
+    "marginal_log_likelihood",
     # calibration
     "calibrate",
 ]
