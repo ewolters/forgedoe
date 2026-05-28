@@ -110,7 +110,11 @@ def d_optimal(factors: list[Factor], n_runs: int, model: str = "linear",
 
     matrix = design.tolist()
     run_order = list(range(1, n_runs + 1))
-    rng.shuffle(run_order)
+    # Shuffle run_order and matrix rows together so they stay correlated
+    combined = list(zip(run_order, matrix))
+    rng.shuffle(combined)
+    run_order = [c[0] for c in combined]
+    matrix = [c[1] for c in combined]
 
     return DesignMatrix(
         factors=factors, matrix=matrix, run_order=run_order,
@@ -190,7 +194,10 @@ def i_optimal(factors: list[Factor], n_runs: int, model: str = "quadratic",
 
     matrix = design.tolist()
     run_order = list(range(1, n_runs + 1))
-    rng.shuffle(run_order)
+    combined = list(zip(run_order, matrix))
+    rng.shuffle(combined)
+    run_order = [c[0] for c in combined]
+    matrix = [c[1] for c in combined]
 
     return DesignMatrix(
         factors=factors, matrix=matrix, run_order=run_order,

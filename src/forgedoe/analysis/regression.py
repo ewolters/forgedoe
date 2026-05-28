@@ -117,7 +117,7 @@ def fit_model(
     effects = {}
     for t in terms:
         if t != "Intercept":
-            effects[t] = round(2 * abs(coefficients[t]), 6)
+            effects[t] = round(2 * coefficients[t], 6)
 
     return AnalysisResult(
         model_type=model_type,
