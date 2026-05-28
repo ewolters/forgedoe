@@ -144,13 +144,11 @@ class EVOPAccumulator:
             k = int(math.log2(n if not (n & (n-1)) else n - 1))  # exclude center
             n_factorial = 2 ** k
             if n_factorial <= n:
-                # Calculate main effects and interactions
+                # Calculate main effects
                 for col in range(k):
-                    # Effect of factor col
                     plus = []
                     minus = []
                     for row in range(n_factorial):
-                        # Determine sign of this factor in this row
                         sign = 1 if (row >> (k - 1 - col)) & 1 else -1
                         if sign > 0:
                             plus.append(means[row])
@@ -158,6 +156,21 @@ class EVOPAccumulator:
                             minus.append(means[row])
                     if plus and minus:
                         effects[f"Factor_{col+1}"] = sum(plus)/len(plus) - sum(minus)/len(minus)
+
+                # Calculate two-factor interactions
+                for c1 in range(k):
+                    for c2 in range(c1 + 1, k):
+                        plus = []
+                        minus = []
+                        for row in range(n_factorial):
+                            s1 = 1 if (row >> (k - 1 - c1)) & 1 else -1
+                            s2 = 1 if (row >> (k - 1 - c2)) & 1 else -1
+                            if s1 * s2 > 0:
+                                plus.append(means[row])
+                            else:
+                                minus.append(means[row])
+                        if plus and minus:
+                            effects[f"Factor_{c1+1}*Factor_{c2+1}"] = sum(plus)/len(plus) - sum(minus)/len(minus)
 
         significant = [name for name, eff in effects.items() if se > 0 and abs(eff) > 2 * se]
 

@@ -151,7 +151,7 @@ def i_optimal(factors: list[Factor], n_runs: int, model: str = "quadratic",
     grid_points = np.array(list(itertools.product(*([grid_levels] * k))))
     X_grid = _build_model_matrix(grid_points, model)
 
-    candidate_levels = [[-1, 0, 1]] * k
+    candidate_levels = [list(np.linspace(-1, 1, 5))] * k  # 5-level grid: -1, -0.5, 0, 0.5, 1
 
     # Initialize
     design = np.zeros((n_runs, k))

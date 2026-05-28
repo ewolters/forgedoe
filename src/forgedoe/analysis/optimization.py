@@ -113,6 +113,57 @@ def optimize_responses(
             best_settings = dict(settings)
             best_predictions = dict(predictions)
 
+    # Local refinement: Nelder-Mead from best random start
+    if best_settings:
+        from scipy.optimize import minimize
+
+        factor_names = [f.name for f in factors]
+
+        def neg_desirability(x):
+            settings = {fname: float(xi) for fname, xi in zip(factor_names, x)}
+            predictions = {}
+            for resp_name, ar in analysis_results.items():
+                pred = ar.coefficients.get("Intercept", 0)
+                for fname in factor_names:
+                    pred += ar.coefficients.get(fname, 0) * settings[fname]
+                for i, f1 in enumerate(factors):
+                    for f2 in factors[i + 1:]:
+                        term = f"{f1.name}*{f2.name}"
+                        pred += ar.coefficients.get(term, 0) * settings[f1.name] * settings[f2.name]
+                for f in factors:
+                    term = f"{f.name}^2"
+                    pred += ar.coefficients.get(term, 0) * settings[f.name] ** 2
+                predictions[resp_name] = pred
+            return -composite_desirability(predictions, responses)
+
+        x0 = [best_settings[f.name] for f in factors]
+        # Nelder-Mead doesn't support bounds natively; clip in objective
+        def bounded_neg_d(x):
+            x_clipped = [max(-1, min(1, xi)) for xi in x]
+            return neg_desirability(x_clipped)
+
+        result = minimize(bounded_neg_d, x0, method="Nelder-Mead",
+                          options={"xatol": 1e-6, "fatol": 1e-8, "maxiter": 500})
+
+        if -result.fun > best_desirability:
+            refined = [max(-1, min(1, xi)) for xi in result.x]
+            best_settings = {fname: v for fname, v in zip(factor_names, refined)}
+            best_desirability = -result.fun
+            # Recompute predictions at refined point
+            best_predictions = {}
+            for resp_name, ar in analysis_results.items():
+                pred = ar.coefficients.get("Intercept", 0)
+                for fname in factor_names:
+                    pred += ar.coefficients.get(fname, 0) * best_settings[fname]
+                for i, f1 in enumerate(factors):
+                    for f2 in factors[i + 1:]:
+                        term = f"{f1.name}*{f2.name}"
+                        pred += ar.coefficients.get(term, 0) * best_settings[f1.name] * best_settings[f2.name]
+                for f in factors:
+                    term = f"{f.name}^2"
+                    pred += ar.coefficients.get(term, 0) * best_settings[f.name] ** 2
+                best_predictions[resp_name] = pred
+
     # Convert to natural units
     natural_settings = {}
     if best_settings:

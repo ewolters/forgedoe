@@ -85,10 +85,13 @@ def fractional_factorial(factors: list[Factor], resolution: int = 3, randomize: 
     if k == 4 and resolution >= 4:
         return full_factorial(factors, randomize=randomize)
 
-    # k == 4, resolution III: 2^(4-1)=8
-    if k == 4 and resolution == 3:
+    # k == 4: D = ABC gives I=ABCD (word length 4 = Resolution IV)
+    # No Resolution III design exists for k=4 with 2-level fractions,
+    # so resolution=3 gets promoted to IV automatically.
+    if k == 4 and resolution <= 4:
         p = 1
-        generators = [[0, 1, 2]]  # D = ABC
+        generators = [[0, 1, 2]]  # D = ABC → Resolution IV
+        resolution = 4  # correct label
     elif (k, resolution) in _catalog:
         p, generators = _catalog[(k, resolution)]
     elif resolution >= 5:

@@ -47,16 +47,23 @@ def create_sequential_plan(
         n_batches: number of batches to split into
         initial_fraction: fraction of budget for initial exploration
     """
-    initial_size = max(4, int(total_budget * initial_fraction))
-    remaining = total_budget - initial_size
-    subsequent_size = remaining // max(1, n_batches - 1)
-    last_batch = remaining - subsequent_size * (n_batches - 2) if n_batches > 2 else remaining
+    if n_batches < 1:
+        n_batches = 1
 
-    batch_sizes = [initial_size]
-    for i in range(n_batches - 2):
-        batch_sizes.append(subsequent_size)
-    if n_batches > 1:
-        batch_sizes.append(last_batch)
+    if n_batches == 1:
+        # Single batch: use entire budget
+        batch_sizes = [total_budget]
+    else:
+        initial_size = max(4, int(total_budget * initial_fraction))
+        remaining = total_budget - initial_size
+        subsequent_size = remaining // max(1, n_batches - 1)
+        last_batch = remaining - subsequent_size * (n_batches - 2) if n_batches > 2 else remaining
+
+        batch_sizes = [initial_size]
+        for _i in range(n_batches - 2):
+            batch_sizes.append(subsequent_size)
+        if n_batches > 1:
+            batch_sizes.append(last_batch)
 
     experiment = AdaptiveExperiment(
         factor_names=factor_names,
