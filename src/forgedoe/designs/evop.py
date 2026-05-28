@@ -131,7 +131,9 @@ class EVOPAccumulator:
         d2_table = {2: 1.128, 3: 1.693, 4: 2.059, 5: 2.326, 6: 2.534, 7: 2.704}
         d2 = d2_table.get(nc, 1.128 + 0.5 * (nc - 2))  # approximate for larger nc
         sigma_est = avg_range / d2 if d2 > 0 else 0
-        se = sigma_est / math.sqrt(nc) if nc > 0 else 0
+        # SE of an effect for 2^k factorial: sigma * sqrt(4 / (n_factorial * n_cycles))
+        n_factorial = 2 ** max(1, int(math.log2(n))) if n > 1 else n
+        se = sigma_est * math.sqrt(4.0 / (n_factorial * nc)) if nc > 0 and n_factorial > 0 else 0
 
         # For 2^2 design (4 factorial + center = 5 points):
         # Effects: A = (y2+y4)/2 - (y1+y3)/2, B = (y3+y4)/2 - (y1+y2)/2
