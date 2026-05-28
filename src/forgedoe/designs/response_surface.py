@@ -7,6 +7,57 @@ import itertools
 from ..core.types import DesignMatrix, Factor
 
 
+def _ccd_fractional_factorial(k: int) -> list[list[int]]:
+    """Generate a Resolution V (or highest available) 2^(k-p) fraction for CCD.
+
+    Uses standard generators per Montgomery Table 8.14:
+    - k=6: 2^(6-1), generator F=ABCDE (Res VI)
+    - k=7: 2^(7-1), generators G=ABCDEF (Res VII via 2^(7-1))
+    - k=8: 2^(8-2), generators G=ABCD, H=ABEF (Res V)
+    - k=9: 2^(9-2), generators H=ABCG, J=BDEF (Res V)
+    - k=10: 2^(10-3), generators H=ABCG, J=BCDE, K=ACDF (Res V)
+    For k>10, uses 2^(k-p) with p chosen for Res V or better.
+    """
+    # Number of base factors and generators
+    generators = {
+        6: (5, [(5, [0, 1, 2, 3, 4])]),       # F = ABCDE
+        7: (6, [(6, [0, 1, 2, 3, 4, 5])]),    # G = ABCDEF
+        8: (6, [(6, [0, 1, 2, 3]),             # G = ABCD
+                (7, [0, 1, 4, 5])]),           # H = ABEF
+        9: (7, [(7, [0, 1, 2, 6]),             # H = ABCG
+                (8, [1, 3, 4, 5])]),           # J = BDEF
+        10: (7, [(7, [0, 1, 2, 6]),            # H = ABCG
+                 (8, [1, 2, 3, 4]),            # J = BCDE
+                 (9, [0, 2, 3, 5])]),          # K = ACDF
+    }
+
+    if k in generators:
+        n_base, gens = generators[k]
+    else:
+        # For k > 10, use half-fraction with last factor = product of all others
+        n_base = k - 1
+        gens = [(k - 1, list(range(k - 1)))]
+
+    # Generate full factorial for base factors
+    base_points = list(itertools.product([-1, 1], repeat=n_base))
+
+    factorial_points = []
+    for row in base_points:
+        full_row = list(row)
+        for col_idx, parent_cols in gens:
+            # Generated column = product of parent columns
+            val = 1
+            for pc in parent_cols:
+                val *= full_row[pc]
+            # Extend row to include generated factor
+            while len(full_row) <= col_idx:
+                full_row.append(0)
+            full_row[col_idx] = val
+        factorial_points.append(full_row[:k])
+
+    return factorial_points
+
+
 def central_composite_design(
     factors: list[Factor],
     alpha: str = "rotatable",
@@ -26,13 +77,12 @@ def central_composite_design(
 
     k = len(factors)
 
-    # Factorial portion (2^k or 2^(k-1) for large k)
+    # Factorial portion (2^k or 2^(k-p) fractional for large k)
     if k <= 5:
         factorial_points = [list(row) for row in itertools.product([-1, 1], repeat=k)]
     else:
-        # Half fraction for large k
-        factorial_points = [list(row) for row in itertools.product([-1, 1], repeat=k)]
-        factorial_points = factorial_points[::2]
+        # Proper fractional factorial using generators (Resolution V minimum)
+        factorial_points = _ccd_fractional_factorial(k)
 
     # Axial (star) points
     if alpha == "rotatable":
